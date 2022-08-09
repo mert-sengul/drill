@@ -94,26 +94,11 @@ public class QueryResources {
         sc, new QueryPage(work, enabledPlugins, request));
   }
 
-
   @POST
   @Path("/query.json")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  @Operation(externalDocs = @ExternalDocumentation(description = "Apache Drill REST API documentation:", url = "https://drill.apache.org/docs/rest-api-introduction/"))
   public QueryResult submitQueryJSON(QueryWrapper query) throws Exception {
-
-    /*
-    Prior to Drill 1.18, REST queries would batch the entire result set in memory,
-    limiting query size. In Drill 1.19 and later, results are streamed from the
-    executor, to the JSON writer and to the HTTP connection with no buffering.
-
-    Starting with Drill 1.19, the "metadata" property specifying the result column
-    data types is placed *before* the data itself. One drawback of doing so is that
-    the schema will report that of the first batch: Drill allows schema to change
-    across batches and thus the schema of the JSON-encoded data would change. This
-    is more a bug with how Drill handles schemas than a JSON issue. (ODBC and JDBC
-    have the same issues.)
-    */
     try {
       // Run the query
       return new RestQueryRunner(query, work, webUserConnection).run();
@@ -121,27 +106,7 @@ public class QueryResources {
       // no-op for authenticated user
       webUserConnection.cleanupSession();
     }
-    // QueryRunner runner = new QueryRunner(work, webUserConnection);
-    // try {
-    //   runner.start(query);
-    // } catch (Exception e) {
-    //   throw new WebApplicationException("Query submission failed", e);
-    // }
-    // return new StreamingOutput() {
-    //   @Override
-    //   public void write(OutputStream output)
-    //     throws IOException, WebApplicationException {
-    //     try {
-    //       runner.sendResults(output);
-    //     } catch (IOException e) {
-    //       throw e;
-    //     } catch (Exception e) {
-    //       throw new WebApplicationException("JSON query failed", e);
-    //     }
-    //   }
-    // };
   }
-
 
   @POST
   @Path("/query")
