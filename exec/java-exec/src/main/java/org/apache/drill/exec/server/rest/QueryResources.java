@@ -100,7 +100,7 @@ public class QueryResources {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   @Operation(externalDocs = @ExternalDocumentation(description = "Apache Drill REST API documentation:", url = "https://drill.apache.org/docs/rest-api-introduction/"))
-  public StreamingOutput submitQueryJSON(QueryWrapper query) throws Exception {
+  public QueryResult submitQueryJSON(QueryWrapper query) throws Exception {
 
     /*
     Prior to Drill 1.18, REST queries would batch the entire result set in memory,
