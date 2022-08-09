@@ -121,7 +121,6 @@ public class QueryResources {
       // no-op for authenticated user
       webUserConnection.cleanupSession();
     }
-    }
   }
 
   @POST
