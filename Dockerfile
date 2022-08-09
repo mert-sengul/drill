@@ -44,13 +44,16 @@ WORKDIR /src
 COPY . .
 
 # Builds Drill
-RUN mvn -Dmaven.artifact.threads=5 -T1C clean install -DskipTests
+# RUN mvn -Dmaven.artifact.threads=5 -T1C clean install -DskipTests
+
+# development build with 7 threads:
+RUN mvn install -T 7 -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Drat.skip=true -Dlicense.skip=true -Dcheckstyle.skip=true -Dfindbugs.skip=true -Dmaven.site.skip=true -Denforcer.skip=true -DskipIfEmpty=true -Dmaven.compiler.optimize=true
 
 # Get project version and copy built binaries into /opt/drill directory
 RUN VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec) \
- && mkdir /opt/drill \
- && mv distribution/target/apache-drill-${VERSION}/apache-drill-${VERSION}/* /opt/drill \
- && chmod -R +r /opt/drill
+    && mkdir /opt/drill \
+    && mv distribution/target/apache-drill-${VERSION}/apache-drill-${VERSION}/* /opt/drill \
+    && chmod -R +r /opt/drill
 
 # Target image
 
@@ -68,9 +71,9 @@ ENV DRILL_LOG_DIR=$DRILL_USER_HOME/log
 ENV DATA_VOL=/data
 
 RUN mkdir $DRILL_HOME $DATA_VOL \
- && groupadd -g 999 $DRILL_USER \
- && useradd -r -u 999 -g $DRILL_USER $DRILL_USER -m -d $DRILL_USER_HOME \
- && chown $DRILL_USER: $DATA_VOL
+    && groupadd -g 999 $DRILL_USER \
+    && useradd -r -u 999 -g $DRILL_USER $DRILL_USER -m -d $DRILL_USER_HOME \
+    && chown $DRILL_USER: $DATA_VOL
 
 # A Docker volume where users may store persistent data, e.g. persistent Drill
 # config by specifying a Drill BOOT option of sys.store.provider.local.path: "/data".
