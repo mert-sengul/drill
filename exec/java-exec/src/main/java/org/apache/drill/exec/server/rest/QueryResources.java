@@ -97,26 +97,9 @@ public class QueryResources {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   public QueryResult submitQueryJSON(QueryWrapper query) throws Exception {
-
-    // Prior to Drill 1.18, REST queries would batch the entire result set
-    // in memory, limiting query size. In Drill 1.19 and later, results are
-    // streamed from the executor, to the JSON writer and to the HTTP connection
-    // with no buffering.
-    //
-    // For compatibility with Drill 1.18 and before, Drill places the query
-    // schema *after* the data. Any tool that needs to know the schema will
-    // need to buffer the entire result set to wait for the schema. An obvious
-    // improvement is to provide an option to send the schema *before* the data.
-    // One drawback of doing so is that the schema will report that of the first
-    // batch: Drill allows schema to change across batches and thus the schema
-    // of the JSON-encoded data would change. This is more a bug with how Drill
-    // handles schemas than a JSON issue. (ODBC and JDBC have the same issues.)
     try {
-      runner.start(query);
       // Run the query
-    } catch (Exception e) {
       return new RestQueryRunner(query, work, webUserConnection).run();
-      throw new WebApplicationException("Query submission failed", e);
     } finally {
       // no-op for authenticated user
       webUserConnection.cleanupSession();
