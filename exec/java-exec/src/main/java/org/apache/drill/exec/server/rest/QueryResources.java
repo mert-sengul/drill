@@ -94,6 +94,7 @@ public class QueryResources {
         sc, new QueryPage(work, enabledPlugins, request));
   }
 
+
   @POST
   @Path("/query.json")
   @Consumes(MediaType.APPLICATION_JSON)
@@ -113,26 +114,34 @@ public class QueryResources {
     is more a bug with how Drill handles schemas than a JSON issue. (ODBC and JDBC
     have the same issues.)
     */
-    QueryRunner runner = new QueryRunner(work, webUserConnection);
     try {
-      runner.start(query);
-    } catch (Exception e) {
-      throw new WebApplicationException("Query submission failed", e);
+      // Run the query
+      return new RestQueryRunner(query, work, webUserConnection).run();
+    } finally {
+      // no-op for authenticated user
+      webUserConnection.cleanupSession();
     }
-    return new StreamingOutput() {
-      @Override
-      public void write(OutputStream output)
-        throws IOException, WebApplicationException {
-        try {
-          runner.sendResults(output);
-        } catch (IOException e) {
-          throw e;
-        } catch (Exception e) {
-          throw new WebApplicationException("JSON query failed", e);
-        }
-      }
-    };
+    // QueryRunner runner = new QueryRunner(work, webUserConnection);
+    // try {
+    //   runner.start(query);
+    // } catch (Exception e) {
+    //   throw new WebApplicationException("Query submission failed", e);
+    // }
+    // return new StreamingOutput() {
+    //   @Override
+    //   public void write(OutputStream output)
+    //     throws IOException, WebApplicationException {
+    //     try {
+    //       runner.sendResults(output);
+    //     } catch (IOException e) {
+    //       throw e;
+    //     } catch (Exception e) {
+    //       throw new WebApplicationException("JSON query failed", e);
+    //     }
+    //   }
+    // };
   }
+
 
   @POST
   @Path("/query")
