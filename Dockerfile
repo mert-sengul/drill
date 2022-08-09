@@ -28,12 +28,12 @@ COPY . /src
 WORKDIR /src
 
 # Builds Drill
-RUN  mvn clean install -DskipTests -q
+RUN  mvn clean install -DskipTests -Dmaven.javadoc.skip=true -Drat.skip=true -Dlicense.skip=true -Dcheckstyle.skip=true -Dfindbugs.skip=true -Dmaven.site.skip=true -Denforcer.skip=true -DskipIfEmpty=true -Dmaven.compiler.optim -q
 
 # Get project version and copy built binaries into /opt/drill directory
 RUN VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec) \
- && mkdir /opt/drill \
- && mv distribution/target/apache-drill-${VERSION}/apache-drill-${VERSION}/* /opt/drill
+    && mkdir /opt/drill \
+    && mv distribution/target/apache-drill-${VERSION}/apache-drill-${VERSION}/* /opt/drill
 
 # Target image
 FROM openjdk:8u232-jdk
