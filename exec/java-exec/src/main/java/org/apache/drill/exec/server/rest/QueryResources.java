@@ -96,7 +96,7 @@ public class QueryResources {
   @Path("/query.json")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  public StreamingOutput submitQueryJSON(QueryWrapper query) throws Exception {
+  public QueryResult submitQueryJSON(QueryWrapper query) throws Exception {
 
     // Prior to Drill 1.18, REST queries would batch the entire result set
     // in memory, limiting query size. In Drill 1.19 and later, results are
@@ -111,25 +111,17 @@ public class QueryResources {
     // batch: Drill allows schema to change across batches and thus the schema
     // of the JSON-encoded data would change. This is more a bug with how Drill
     // handles schemas than a JSON issue. (ODBC and JDBC have the same issues.)
-    QueryRunner runner = new QueryRunner(work, webUserConnection);
     try {
       runner.start(query);
+      // Run the query
     } catch (Exception e) {
+      return new RestQueryRunner(query, work, webUserConnection).run();
       throw new WebApplicationException("Query submission failed", e);
+    } finally {
+      // no-op for authenticated user
+      webUserConnection.cleanupSession();
     }
-    return new StreamingOutput() {
-      @Override
-      public void write(OutputStream output)
-          throws IOException, WebApplicationException {
-        try {
-          runner.sendResults(output);
-        } catch (IOException e) {
-          throw e;
-        } catch (Exception e) {
-          throw new WebApplicationException("JSON query failed", e);
-        }
-      }
-    };
+    }
   }
 
   @POST
