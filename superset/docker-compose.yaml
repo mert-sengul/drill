@@ -1,0 +1,23 @@
+# docker-compose.yml
+version: "3.4"
+
+services:
+  drill:
+    # image: apache/drill
+    build:
+      context: ./drill
+      dockerfile: Dockerfile
+    ports:
+      - "8047:8047"
+    expose:
+      - 8047
+    stdin_open: true
+  superset:
+    # image: electroop/bilal-ss:1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - drill
+    ports:
+      - "8080:8088"
